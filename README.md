@@ -1,7 +1,15 @@
-# https-node-api-demo
+# zuo-config-server
 
-https 接口测试
+Config center server part, by Koa.js + MongoDB
 
-## 项目初始化过程
+## Mongodb
 
-npm init # 创建 package.json
+db: "zuo-config"
+
+### collection
+
+#### short-link
+
+```js
+{ shortLink: "xx", redirect: "xx" }
+```
