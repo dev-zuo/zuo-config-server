@@ -1,4 +1,4 @@
-const mongodbCore = require('./mongodb.js')
+const mongodbCore = require('../mongodb/mongodb.js')
 
 // curd 测试
 const init = (router) => {
@@ -17,6 +17,14 @@ const init = (router) => {
             { region:"华中", city:"武汉", sales: 1000},
             { region:"华中", city:"湖南", sales: 500}
         ]);
+        // insertResult
+        // {
+        //     "acknowledged": true,
+        //     "insertedCount": 1,
+        //     "insertedIds": {
+        //         "0": "63bad8ad9ef5837193990777"
+        //     }
+        // }
         ctx.body = { code: 0, data: insertResult, msg: '成功' }
     })
 
@@ -36,6 +44,11 @@ const init = (router) => {
             // city: "武汉234234"
             city: "上海"
         })
+        // deleteResult
+        // "deleteResult": {
+        //     "acknowledged": true,
+        //     "deletedCount": 4
+        // }
         //   "deletedCount": 0
         ctx.body = { code: 0, data: deleteResult, msg: '成功' }
     })
