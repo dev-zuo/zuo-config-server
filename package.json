@@ -1,0 +1,26 @@
+{
+  "name": "https-node-api-demo",
+  "version": "1.0.0",
+  "description": "https 接口测试",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zuoxiaobai/https-node-api-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zuoxiaobai/https-node-api-demo/issues"
+  },
+  "homepage": "https://github.com/zuoxiaobai/https-node-api-demo#readme",
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.13.4",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^12.0.0",
+    "mongodb": "^4.10.0"
+  }
+}
