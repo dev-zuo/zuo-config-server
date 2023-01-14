@@ -47,10 +47,10 @@ const shortLinkDb = {
     return updateResult;
   },
 
-  async del(id) {
+  async del(_id) {
     const db = mongodbCore.getDb();
     const deleteResult = await db.collection('short-link').deleteMany({
-      _id: ObjectId(id)
+      _id: ObjectId(_id)
     });
     return deleteResult;
   }

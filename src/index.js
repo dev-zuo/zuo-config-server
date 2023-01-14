@@ -88,9 +88,9 @@ router.post('/shortLink/edit', async (ctx) => {
 });
 
 router.post('/shortLink/del', async (ctx) => {
-  let { id } = ctx.request.body;
+  let { _id } = ctx.request.body;
   try {
-    let deleteResult = await shortLinkDb.del(id);
+    let deleteResult = await shortLinkDb.del(_id);
     ctx.body = {
       code: 0,
       data: {
