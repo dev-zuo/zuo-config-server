@@ -32,7 +32,7 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   console.log(ctx.path); // /shortLink/list、/shortLink/add
   let whiteList = ['/user/login'];
-  if (whiteList.includes(ctx.path) || ctx.userInfo) {
+  if (whiteList.includes(ctx.path) || ctx.path.startsWith('/share/') || ctx.userInfo) {
     await next();
     return;
   }
@@ -61,14 +61,45 @@ app.use(async (ctx, next) => {
 // 连接 mongodb，初始化 db
 mongodbCore.init({ dbName: 'zuo-config' });
 
+// 配置中心对外接口，暂时不需要鉴权（前端直接可以调用，不用登录）
+router.get('/share/shortLink/list', async (ctx) => {
+  console.log('ctx.query', ctx.query);
+  let { queryText = '', currentPage = 1, pageSize = 20, _id = '' } = ctx.query;
+  try {
+    let { list, total } = await shortLinkDb.getList(
+      queryText,
+      {
+        pageSize: parseInt(pageSize),
+        pageIndex: parseInt(currentPage)
+      },
+      _id
+    );
+    ctx.body = {
+      code: 0,
+      data: {
+        queryText: ctx.query.queryText,
+        list,
+        total
+      },
+      msg: '成功'
+    };
+  } catch (e) {
+    ctx.body = { code: -10001, msg: '获取短链接列表失败', plainMsg: e.message };
+  }
+});
+
 router.get('/shortLink/list', async (ctx) => {
   console.log('ctx.query', ctx.query);
   let { queryText, currentPage, pageSize } = ctx.query;
   try {
-    let { list, total } = await shortLinkDb.getList(queryText, {
-      pageSize: parseInt(pageSize),
-      pageIndex: parseInt(currentPage)
-    });
+    let { list, total } = await shortLinkDb.getList(
+      queryText,
+      {
+        pageSize: parseInt(pageSize),
+        pageIndex: parseInt(currentPage)
+      },
+      ctx.userInfo?._id
+    );
     ctx.body = {
       code: 0,
       data: {
@@ -86,7 +117,7 @@ router.get('/shortLink/list', async (ctx) => {
 router.post('/shortLink/add', async (ctx) => {
   console.log(ctx.request.body);
   try {
-    let insertResult = await shortLinkDb.add(ctx.request.body);
+    let insertResult = await shortLinkDb.add(ctx.request.body, ctx.userInfo?._id);
     ctx.body = {
       code: 0,
       data: {
@@ -145,7 +176,7 @@ router.post('/user/login', async (ctx) => {
       delete userInfo.password; // Reflect.deleteProperty(userInfo, 'password');
       let token = jwt.sign(
         {
-          exp: Math.floor(Date.now() / 1000) + 60 * 5, // 有效期，单位 s
+          exp: Math.floor(Date.now() / 1000) + 60 * 60, // 有效期，单位 s
           data: { name, _id: userInfo._id } // 存放到 token 里面的信息，一般用户通过 token 获取用户 id
         },
         privateKey

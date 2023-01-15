@@ -1,13 +1,17 @@
 const mongodbCore = require('../mongodb/mongodb.js');
 const { ObjectId } = require('mongodb');
+const dayjs = require('dayjs');
+
+const getCurDate = () => dayjs().format('YYYY/MM/DD HH:mm:ss');
 
 const shortLinkDb = {
-  async getList(queryStr, { pageIndex, pageSize }) {
+  async getList(queryStr, { pageIndex, pageSize }, userId) {
     const db = mongodbCore.getDb();
     // 查询列表数据
-    let queryRule = {};
+    let queryRule = { userId };
     if (queryStr) {
       queryRule = {
+        userId, // where userId='xxx' and ( shortLink like '%xx%' or xxx)
         $or: [{ shortLink: { $regex: queryStr } }, { redirect: { $regex: queryStr } }]
       };
     }
@@ -26,10 +30,17 @@ const shortLinkDb = {
     return { list, total };
   },
 
-  async add(payload) {
+  async add(payload, userId) {
     const db = mongodbCore.getDb();
     // 插入数据时 _id 会自动增加
-    const insertResult = await db.collection('short-link').insertMany([payload]);
+    const insertResult = await db.collection('short-link').insertMany([
+      {
+        shortLink: payload.shortLink,
+        redirect: payload.redirect,
+        userId: userId,
+        createDate: getCurDate()
+      }
+    ]);
     return insertResult;
   },
 
@@ -41,7 +52,7 @@ const shortLinkDb = {
         _id: ObjectId(_id)
       },
       {
-        $set: { shortLink, redirect }
+        $set: { shortLink, redirect, updateDate: getCurDate() }
       }
     );
     return updateResult;

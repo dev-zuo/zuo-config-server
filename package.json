@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/zuoxiaobai/https-node-api-demo#readme",
   "dependencies": {
+    "dayjs": "^1.11.7",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
