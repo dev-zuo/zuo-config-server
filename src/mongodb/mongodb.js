@@ -14,7 +14,6 @@ const init = async ({ dbName }) => {
 
 const getDb = (dbName) => {
   let db = client.db(dbName || databaseName);
-  console.log(db);
   return db;
 };
 

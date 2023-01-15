@@ -56,6 +56,21 @@ const shortLinkDb = {
   }
 };
 
+const userBb = {
+  async login({ name, password }) {
+    const db = mongodbCore.getDb();
+    const infoList = await db
+      .collection('user')
+      .find({
+        name,
+        password
+      })
+      .toArray();
+    return { isValidUser: !!infoList.length, userInfo: infoList[0] };
+  }
+};
+
 module.exports = {
-  shortLinkDb
+  shortLinkDb,
+  userBb
 };

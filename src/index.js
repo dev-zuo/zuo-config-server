@@ -6,7 +6,10 @@ const app = new Koa();
 const router = new KoaRouter();
 const mongodbCore = require('./mongodb/mongodb.js');
 const { shortLinkDb } = require('./mongodb/dao.js');
+const { userBb } = require('./mongodb/dao.js');
+const jwt = require('jsonwebtoken');
 
+const privateKey = 'xxxx_privateKey';
 app.use(bodyParser()); // 处理 post 请求参数
 
 /**
@@ -22,6 +25,31 @@ app.use(async (ctx, next) => {
     ctx.body = 200;
   } else {
     await next();
+  }
+});
+
+// 鉴权，判断是否有登录权限
+app.use(async (ctx, next) => {
+  console.log(ctx.path); // /shortLink/list、/shortLink/add
+  let whiteList = ['/user/login'];
+  if (whiteList.includes(ctx.path) || ctx.userInfo) {
+    await next();
+    return;
+  }
+
+  let { token } = ctx.request.header;
+  try {
+    let decoded = jwt.verify(token, privateKey);
+    // console.log('decode', decoded.data, typeof decoded.data); // { name: 'admin', _id: '63c3babac401a248bd88988a' } Object
+    ctx.userInfo = { ...decoded.data, token }; // JSON.parse 会异常，导致中断，所以加 catch
+    console.log('解析成功', ctx.userInfo);
+    await next();
+  } catch (err) {
+    ctx.body = {
+      code: -1,
+      msg: '未登录，请先登录',
+      plainMsg: err.name + ': ' + err.message
+    };
   }
 });
 
@@ -103,21 +131,37 @@ router.post('/shortLink/del', async (ctx) => {
   }
 });
 
-// router.get("/goods/get", async (ctx) => {
-//   ctx.body = {
-//     code: 0,
-//     data: {
-//       info: '商品信息'
-//     },
-//     msg: '成功',
-//   };
-// });
+// 获取用户信息
+router.get('/user/info', async (ctx) => {
+  ctx.body = { code: 0, data: ctx.userInfo };
+});
 
-router.post('/user/edit', async (ctx) => {
-  ctx.body = {
-    code: 0,
-    msg: '修改成功'
-  };
+router.post('/user/login', async (ctx) => {
+  let { name, password } = ctx.request.body;
+  console.log(name, password);
+  try {
+    let { isValidUser, userInfo } = await userBb.login({ name, password });
+    if (isValidUser) {
+      delete userInfo.password; // Reflect.deleteProperty(userInfo, 'password');
+      let token = jwt.sign(
+        {
+          exp: Math.floor(Date.now() / 1000) + 60 * 5, // 有效期，单位 s
+          data: { name, _id: userInfo._id } // 存放到 token 里面的信息，一般用户通过 token 获取用户 id
+        },
+        privateKey
+      );
+      ctx.body = {
+        code: 0,
+        data: { ...userInfo, token }, // 将 token 返回给前端，前端下次所有请求，都需需要将 token 放到请求头里面
+        msg: '成功'
+      };
+    } else {
+      ctx.body = { code: -10001, msg: '用户名或密码错误' };
+    }
+  } catch (e) {
+    console.log(e);
+    ctx.body = { code: -10001, msg: '登录失败', plainMsg: e.message };
+  }
 });
 
 app.use(router.routes()).use(router.allowedMethods());
