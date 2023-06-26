@@ -61,6 +61,15 @@ app.use(async (ctx, next) => {
 // 连接 mongodb，初始化 db
 mongodbCore.init({ dbName: 'zuo-config' });
 
+router.get('/share/test-deploy', async (ctx) => {
+  ctx.body = {
+    code: 0,
+    data: {
+      test: '新接口自动化部署成功'
+    },
+    msg: '成功'
+  }
+})
 // 配置中心对外接口，暂时不需要鉴权（前端直接可以调用，不用登录）
 router.get('/share/shortLink/list', async (ctx) => {
   console.log('ctx.query', ctx.query);
