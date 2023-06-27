@@ -65,7 +65,7 @@ router.get('/share/test-deploy', async (ctx) => {
   ctx.body = {
     code: 0,
     data: {
-      test: '新接口自动化部署成功'
+      test: 'v1.0.0新接口自动化部署成功'
     },
     msg: '成功'
   }
