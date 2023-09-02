@@ -2,6 +2,10 @@
 
 Config center server part, by Koa.js + MongoDB
 
+> Node version: v14.19.1，比较新的版本，比如 18.17.1 可能会导致接口服务崩溃
+
+注意：运行服务需要开启 MongoDB 服务，如果没有开机启动服务，需要在手动启动服务后，重新运行 node src/index.js 重启接口服务 
+
 ## 对外接口鉴权
 
 TODO
